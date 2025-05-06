@@ -39,6 +39,15 @@ st.title("⚾ 팀 구성 기반 선수 추천 시스템")
 # 🧩 역할 선택
 role = st.radio("선수 유형을 선택하세요", ["타자", "투수"], horizontal=True)
 
+# 📊 사용자 클러스터 비율 설정
+st.sidebar.header("🧮 원하는 클러스터 비율 설정")
+_, hs_name, _ = get_cluster_names(role)
+custom_ratio = {}
+for c in [0, 2, 3, 4]:
+    label = hs_name.get(c, f"클러스터 {c}")
+    ratio = st.sidebar.slider(f"{label} 비율 (%)", 0, 100, 25, 5)
+    custom_ratio[c] = ratio / 100
+
 # 데이터 불러오기
 with st.spinner("데이터 불러오는 중..."):
     df_pro = pd.read_excel(URLS[f"{role}_프로"])
@@ -51,14 +60,13 @@ selected_names = st.multiselect("✅ 우리 팀 선수 선택", sorted(all_names
 if selected_names:
     df_my = df_pro[df_pro['Name'].isin(selected_names)]
     pro_name, hs_name, cluster_map = get_cluster_names(role)
-    desired_ratio = {0: 0.25, 2: 0.25, 3: 0.25, 4: 0.25}
 
     # 📉 클러스터 비율 분석
     my_ratio = df_my['cluster'].value_counts(normalize=True)
-    short_clusters = [c for c in desired_ratio if my_ratio.get(c, 0) < desired_ratio[c] and c != 1]
+    short_clusters = [c for c in custom_ratio if my_ratio.get(c, 0) < custom_ratio[c]]
 
+    # 타자일 경우, 포지션 약점 판단
     if role == "타자":
-        # 포지션 약점 판단: 보류형 비율 가장 높은 포지션
         boryu_ratio = {}
         for pos, codes in POSITION_MAP.items():
             subset = df_my[df_my['position'].isin(codes)]
@@ -86,11 +94,17 @@ if selected_names:
         hs_cluster_labels = [hs_name.get(h, f"클러스터 {h}") for h in hs_clusters]
 
         if role == "타자":
+            if '포지션_encoded' not in df_high.columns:
+                st.error("❌ '포지션_encoded' 컬럼이 누락되어 있습니다.")
+                break
             filtered = df_high[(df_high['cluster'].isin(hs_clusters)) & (df_high['포지션_encoded'].isin(min_pos_codes))]
             filtered = filtered.sort_values(by='Probability_of_1', ascending=False).head(5)
             filtered = filtered[['이름', 'cluster', 'Probability_of_1']].rename(columns={'cluster': '고교 클러스터', 'Probability_of_1': '추천 확률'})
             filtered['고교 클러스터'] = filtered['고교 클러스터'].replace(hs_name)
         else:
+            if 'Cluster' not in df_high.columns:
+                st.error("❌ 'Cluster' 컬럼이 누락되어 있습니다.")
+                break
             filtered = df_high[(df_high['Cluster'].isin(hs_clusters)) & (df_high['포지션_encoded'].isin(min_pos_codes))]
             filtered = filtered.sort_values(by='Probability_of_1', ascending=False).head(5)
             filtered = filtered[['이름', 'Cluster', 'Probability_of_1']].rename(columns={'Cluster': '고교 클러스터', 'Probability_of_1': '추천 확률'})
