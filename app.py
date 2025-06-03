@@ -74,7 +74,7 @@ pro_name, hs_name, cluster_map = get_cluster_names(role)
 desired_ratio = {}
 
 for c in pro_name:
-    label = f"✅ {pro_name[c]} (클러스터 {c}) 비율 설정 (%)"
+    label = f"{pro_name[c]} 비율 설정 (%)"
     desired_ratio[c] = st.sidebar.slider(label, 0, 100, 25) / 100
 
 # 👇 본 분석 진행
