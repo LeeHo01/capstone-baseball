@@ -5,10 +5,10 @@ import pandas as pd
 
 # 📁 GitHub Raw 파일 경로
 URLS = {
-    "타자_프로": "https://raw.githubusercontent.com/LeeHo01/capstone-baseball/main/%ED%94%84%EB%A1%9C%ED%83%80%EC%9E%90%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81%EA%B2%B0%EA%B3%BC.xlsx",
-    "타자_고교": "https://raw.githubusercontent.com/LeeHo01/capstone-baseball/main/%EA%B3%A0%EA%B5%902024%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81.xlsx",
-    "투수_프로": "https://raw.githubusercontent.com/LeeHo01/capstone-baseball/main/%ED%94%84%EB%A1%9C%ED%88%AC%EC%88%98%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81%EA%B2%B0%EA%B3%BC.xlsx",
-    "투수_고교": "https://raw.githubusercontent.com/LeeHo01/capstone-baseball/main/%ED%88%AC%EC%88%98_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81.xlsx"
+    "타자_프로": "https://github.com/LeeHo01/capstone-baseball/blob/main/%ED%94%84%EB%A1%9C%ED%83%80%EC%9E%90%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81%EA%B2%B0%EA%B3%BC(4).xlsx",
+    "타자_고교": "https://github.com/LeeHo01/capstone-baseball/blob/main/%EA%B3%A0%EA%B5%90_%ED%83%80%EC%9E%90_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81(4).xlsx",
+    "투수_프로": "https://github.com/LeeHo01/capstone-baseball/blob/main/%ED%94%84%EB%A1%9C%ED%88%AC%EC%88%98%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx",
+    "투수_고교": "https://github.com/LeeHo01/capstone-baseball/blob/main/%EA%B3%A0%EA%B5%90%ED%88%AC%EC%88%98_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx"
 }
 
 POSITION_MAP = {
