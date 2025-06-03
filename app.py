@@ -8,49 +8,48 @@ URLS = {
     "투수_프로": "https://github.com/LeeHo01/capstone-baseball/raw/main/프로투수클러스터링_4개.xlsx",
     "투수_고교": "https://github.com/LeeHo01/capstone-baseball/raw/main/고교투수_클러스터링_4개.xlsx"
 }
-
 POSITION_MAP = {
     "내야수": list(range(0, 4)),
     "외야수": list(range(5, 10)),
     "포수": [10]
 }
 
+# 클러스터 명칭 및 매핑
 def get_cluster_names(role):
     if role == "타자":
         return {
-            1: "수비 및 주루 특화타자",
+            0: "거포형 타자",
+            1: "선구안 기반 출루 타자",
             2: "타격 기반 출루 타자",
-            3: "선구안 기반 출루 타자",
-            4: "거포형 타자"
+            3: "수비 및 주루 특화타자"
         }, {
-            0: "수비 및 주루 특화타자",       # 고교 클러스터 0
-            1: "선구안 기반 출루 타자",       # 고교 클러스터 1
-            2: "타격 기반 출루 타자",         # 고교 클러스터 2
-            3: "거포형 타자"                 # 고교 클러스터 3
+            0: "거포형 타자",
+            1: "선구안 기반 출루 타자",
+            2: "타격 기반 출루 타자",
+            3: "수비 및 주루 특화타자"
         }, {
-            1: [0],  # 프로 클러스터 1번 → 고교 0번 추천
-            2: [2],  # 프로 2번 → 고교 2번
-            3: [1],  # 프로 3번 → 고교 1번
-            4: [3]   # 프로 4번 → 고교 3번
+            0: [3],  # 프로 거포형 → 고교 3
+            1: [1],  # 프로 선구안 기반 → 고교 1
+            2: [2],  # 프로 타격 기반 → 고교 2
+            3: [0]   # 프로 수비 및 주루 → 고교 0
         }
     else:
         return {
-            1: "선발형",
-            2: "제구형",
-            3: "강속구형",
-            4: "중간계투형"
+            0: "제구형",
+            1: "불안정형",
+            2: "선발형",
+            3: "강속구형"
         }, {
             0: "선발형",
             1: "제구형",
-            2: "중간계투형",
+            2: "불안정형",
             3: "강속구형"
         }, {
-            1: [0],
-            2: [1],
-            3: [3],
-            4: [2]
+            0: [1],  # 프로 제구형 → 고교 1
+            1: [],   # 불안정형 → 추천 안함
+            2: [0],  # 선발형 → 고교 0
+            3: [3]   # 강속구형 → 고교 3
         }
-
 
 # ✅ Streamlit 시작
 st.set_page_config(page_title="스카우트 추천 시스템", layout="wide")
@@ -73,9 +72,8 @@ st.sidebar.header("🎯 원하는 클러스터 비율 설정")
 pro_name, hs_name, cluster_map = get_cluster_names(role)
 desired_ratio = {}
 
-for c in [1, 2, 3, 4]:
-    label = pro_name[c]
-    desired_ratio[c] = st.sidebar.slider(f"{label} 비율 (%)", 0, 100, 25) / 100
+for c in pro_name:
+    desired_ratio[c] = st.sidebar.slider(f"{pro_name[c]} 비율 (%)", 0, 100, 25) / 100
 
 # 👇 본 분석 진행
 if selected_names:
@@ -94,22 +92,26 @@ if selected_names:
         min_position = max(boryu_ratio, key=boryu_ratio.get)
         min_pos_codes = POSITION_MAP[min_position]
     else:
-        min_pos_codes = None
+        min_pos_codes = None  # 투수는 포지션 없음
 
     # 🧠 출력
     st.subheader("📊 우리 팀 클러스터 분포")
     for c, p in my_ratio.items():
-        if c in pro_name:
-            st.markdown(f"- **{pro_name[c]}** → {p:.1%}")
+        st.markdown(f"- **{pro_name[c]}** → {p:.1%}")
 
     st.subheader("😵 전략상 부족한 클러스터")
-    st.markdown(f"- {[pro_name[c] for c in short_clusters if c in pro_name]}")
+    st.markdown(f"- {[pro_name[c] for c in short_clusters]}")
     if role == "타자":
-        st.markdown(f"- 작전형 타자 비중 가장 높은 포지션: **{min_position}**")
+        st.markdown(f"- 보류형 비중 가장 높은 포지션: **{min_position}**")
 
     st.subheader("🎯 고교 선수 추천 결과")
+
     for c in short_clusters:
         hs_clusters = cluster_map.get(c, [])
+        if not hs_clusters:  # 추천 제외 조건 (특히 투수 불안정형)
+            st.markdown(f"#### ⚠️ [{pro_name[c]}] 유형은 전략상 추천이 제공되지 않습니다.")
+            continue
+
         hs_cluster_labels = [hs_name.get(h, f"클러스터 {h}") for h in hs_clusters]
 
         if role == "타자":
@@ -130,5 +132,6 @@ if selected_names:
 
         st.markdown(f"#### ✅ [{pro_name[c]}] → 고교 클러스터 {hs_cluster_labels}")
         st.dataframe(filtered)
+
 else:
     st.info("👆 위에서 선수를 선택하세요.")
