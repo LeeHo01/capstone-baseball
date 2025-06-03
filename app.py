@@ -1,14 +1,14 @@
-# app.py - 통합 Streamlit 앱 (타자 & 투수 추천)
+# app.py - 클러스터명 갱신 Streamlit 앱
 
 import streamlit as st
 import pandas as pd
 
 # 📁 GitHub Raw 파일 경로
 URLS = {
-    "타자_프로": "https://github.com/LeeHo01/capstone-baseball/blob/main/%ED%94%84%EB%A1%9C%ED%83%80%EC%9E%90%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81%EA%B2%B0%EA%B3%BC(4).xlsx",
-    "타자_고교": "https://github.com/LeeHo01/capstone-baseball/blob/main/%EA%B3%A0%EA%B5%90_%ED%83%80%EC%9E%90_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81(4).xlsx",
-    "투수_프로": "https://github.com/LeeHo01/capstone-baseball/blob/main/%ED%94%84%EB%A1%9C%ED%88%AC%EC%88%98%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx",
-    "투수_고교": "https://github.com/LeeHo01/capstone-baseball/blob/main/%EA%B3%A0%EA%B5%90%ED%88%AC%EC%88%98_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx"
+    "타자_프로": "https://github.com/LeeHo01/capstone-baseball/raw/main/%ED%94%84%EB%A1%9C%ED%83%80%EC%9E%90%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81%EA%B2%B0%EA%B3%BC(4).xlsx",
+    "타자_고교": "https://github.com/LeeHo01/capstone-baseball/raw/main/%EA%B3%A0%EA%B5%90_%ED%83%80%EC%9E%90_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81(4).xlsx",
+    "투수_프로": "https://github.com/LeeHo01/capstone-baseball/raw/main/%ED%94%84%EB%A1%9C%ED%88%AC%EC%88%98%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx",
+    "투수_고교": "https://github.com/LeeHo01/capstone-baseball/raw/main/%EA%B3%A0%EA%B5%90%ED%88%AC%EC%88%98_%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81_4%EA%B0%9C.xlsx"
 }
 
 POSITION_MAP = {
@@ -17,20 +17,20 @@ POSITION_MAP = {
     "포수": [10]
 }
 
-# 클러스터 명칭 매핑
+# 클러스터 명칭 매핑 (최신 버전)
 def get_cluster_names(role):
     if role == "타자":
         return {
-            0: "파워컨택형", 1: "보류형", 2: "팔방미인형", 3: "선구안+주루 하이브리드", 4: "하이파워 로우출루형"
+            1: "선발형", 2: "제구형", 3: "강속구형", 4: "중간계투형"
         }, {
-            0: "성실한 주전", 1: "작전형 플레이어", 2: "즉시전력감", 3: "파워히터"
-        }, {0: [0], 2: [2], 3: [1], 4: [3]}
+            0: "선발형", 1: "제구형", 2: "중간계투형", 3: "강속구형"
+        }, {1: [0], 2: [1], 3: [3], 4: [2]}
     else:
         return {
-            0: "에이스&파워-제구 균형형", 1: "난타-제구 불안형", 2: "선발형 투수", 3: "구위형 불펜투수", 4: "롱릴리프/스윙맨"
+            1: "선발형", 2: "제구형", 3: "강속구형", 4: "중간계투형"
         }, {
-            0: "이닝이터", 2: "구위형 투수", 3: "에이스형 투수", 4: "중간계투형"
-        }, {0: [3], 2: [0], 3: [2], 4: [4]}
+            0: "선발형", 1: "제구형", 2: "중간계투형", 3: "강속구형"
+        }, {1: [0], 2: [1], 3: [3], 4: [2]}
 
 # ✅ Streamlit 시작
 st.set_page_config(page_title="스카우트 추천 시스템", layout="wide")
@@ -53,7 +53,7 @@ st.sidebar.header("🎯 원하는 클러스터 비율 설정")
 pro_name, hs_name, cluster_map = get_cluster_names(role)
 desired_ratio = {}
 
-for c in [0, 2, 3, 4]:
+for c in [1, 2, 3, 4]:
     label = pro_name[c]
     desired_ratio[c] = st.sidebar.slider(f"{label} 비율 (%)", 0, 100, 25) / 100
 
@@ -74,15 +74,16 @@ if selected_names:
         min_position = max(boryu_ratio, key=boryu_ratio.get)
         min_pos_codes = POSITION_MAP[min_position]
     else:
-        min_pos_codes = None  # 투수는 포지션 없음
+        min_pos_codes = None
 
     # 🧠 출력
     st.subheader("📊 우리 팀 클러스터 분포")
     for c, p in my_ratio.items():
-        st.markdown(f"- **{pro_name[c]}** → {p:.1%}")
+        if c in pro_name:
+            st.markdown(f"- **{pro_name[c]}** → {p:.1%}")
 
     st.subheader("😵 전략상 부족한 클러스터")
-    st.markdown(f"- {[pro_name[c] for c in short_clusters]}")
+    st.markdown(f"- {[pro_name[c] for c in short_clusters if c in pro_name]}")
     if role == "타자":
         st.markdown(f"- 보류형 비중 가장 높은 포지션: **{min_position}**")
 
