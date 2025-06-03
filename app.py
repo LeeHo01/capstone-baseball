@@ -8,6 +8,7 @@ URLS = {
     "투수_프로": "https://github.com/LeeHo01/capstone-baseball/raw/main/프로투수클러스터링_4개.xlsx",
     "투수_고교": "https://github.com/LeeHo01/capstone-baseball/raw/main/고교투수_클러스터링_4개.xlsx"
 }
+
 POSITION_MAP = {
     "내야수": list(range(0, 4)),
     "외야수": list(range(5, 10)),
@@ -28,10 +29,10 @@ def get_cluster_names(role):
             2: "타격 기반 출루 타자",
             3: "수비 및 주루 특화타자"
         }, {
-            0: [3],  # 프로 거포형 → 고교 3
-            1: [1],  # 프로 선구안 기반 → 고교 1
-            2: [2],  # 프로 타격 기반 → 고교 2
-            3: [0]   # 프로 수비 및 주루 → 고교 0
+            0: [3],
+            1: [1],
+            2: [2],
+            3: [0]
         }
     else:
         return {
@@ -45,10 +46,10 @@ def get_cluster_names(role):
             2: "불안정형",
             3: "강속구형"
         }, {
-            0: [1],  # 프로 제구형 → 고교 1
-            1: [],   # 불안정형 → 추천 안함
-            2: [0],  # 선발형 → 고교 0
-            3: [3]   # 강속구형 → 고교 3
+            0: [1],
+            1: [],    # ❌ 불안정형은 추천하지 않음
+            2: [0],
+            3: [3]
         }
 
 # ✅ Streamlit 시작
@@ -73,7 +74,8 @@ pro_name, hs_name, cluster_map = get_cluster_names(role)
 desired_ratio = {}
 
 for c in pro_name:
-    desired_ratio[c] = st.sidebar.slider(f"{pro_name[c]} 비율 (%)", 0, 100, 25) / 100
+    label = f"✅ {pro_name[c]} (클러스터 {c}) 비율 설정 (%)"
+    desired_ratio[c] = st.sidebar.slider(label, 0, 100, 25) / 100
 
 # 👇 본 분석 진행
 if selected_names:
@@ -108,8 +110,8 @@ if selected_names:
 
     for c in short_clusters:
         hs_clusters = cluster_map.get(c, [])
-        if not hs_clusters:  # 추천 제외 조건 (특히 투수 불안정형)
-            st.markdown(f"#### ⚠️ [{pro_name[c]}] 유형은 전략상 추천이 제공되지 않습니다.")
+        if not hs_clusters:
+            st.markdown(f"#### ⚠️ [{pro_name[c]}] 유형은 전략상 추천되지 않습니다.")
             continue
 
         hs_cluster_labels = [hs_name.get(h, f"클러스터 {h}") for h in hs_clusters]
@@ -135,3 +137,4 @@ if selected_names:
 
 else:
     st.info("👆 위에서 선수를 선택하세요.")
+
